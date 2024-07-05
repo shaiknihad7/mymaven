@@ -1,42 +1,58 @@
+@Library('mylibrary')_
 pipeline
 {
     agent any
     stages
     {
-        stage('contDownload')
+        stage('contDownload_Master')
         {
             steps
             {
-                git 'https://github.com/shaiknihad7/mymaven.git'
+                script
+                {
+                    cicd.gitDownload("maven")
+                }
             }
         }
-        stage('contBuild')
+        stage('contBuild_Master')
         {
             steps
             {
-                sh 'mvn package'
+                script
+                {
+                    cicd.buildArtifact()
+                }
             }
         }
-        stage('contDeployment')
+        stage('contDeployment_Master')
         {
             steps
             {
-                sh 'scp /var/lib/jenkins/workspace/Declarativepipeline2/webapp/target/webapp.war ubuntu@172.31.30.74:/var/lib/tomcat9/webapps/testapp.war'
+                script
+                {
+                    cicd.deployTomcat("Declarativepipelinewithlibraries","172.31.30.74","testapp")
+                }
             }
         }
-        stage('contTesting')
+        stage('contTesting_Master')
         {
             steps
             {
-              git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
-              sh 'java -jar /var/lib/jenkins/workspace/Declarativepipeline2/testing.jar'
+                script
+                {
+                  cicd.gitDownload("FunctionalTesting")
+                  cicd.runSelenium("Declarativepipelinewithlibraries")
+                }
             }
         }
-        stage('contDelivery')
+        stage('contDelivery_Master')
         {
             steps
             {
-              sh 'scp /var/lib/jenkins/workspace/Declarativepipeline2/webapp/target/webapp.war ubuntu@172.31.28.139:/var/lib/tomcat9/webapps/prodapp.war'
+                script
+                {
+                     cicd.deployTomcat("Declarativepipelinewithlibraries","172.31.28.139","prodapp")
+                }
             }
         }
     }
